@@ -1,4 +1,8 @@
-# c3-dev-chart
+## 📊 c3.js Developer Survey Chart
+
+A sample filterable bar chart using data from [Stack Overflow's 2020 Developer Survey](https://insights.stackoverflow.com/survey/).
+
+---
 
 ## Project setup
 ```
