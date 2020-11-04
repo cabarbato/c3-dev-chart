@@ -1,6 +1,9 @@
+#### Progress: 
+![80%](https://progress-bar.dev/80/?width=400)
+
 ## 📊 c3.js Developer Survey Chart
 
-A sample filterable bar chart using data from [Stack Overflow's 2020 Developer Survey](https://insights.stackoverflow.com/survey/).
+A sample filterable bar chart using data from [Stack Overflow's 2020 Developer Survey](https://insights.stackoverflow.com/survey/) to display average salaries by country.
 
 ---
 
