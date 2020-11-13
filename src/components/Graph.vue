@@ -12,43 +12,52 @@ import "c3/c3.min.css";
 export default {
   props: {
     devData: {
-      type: Array
+      type: Array,
     },
     selected: {
-      type: String
-    }
+      type: String,
+    },
   },
   computed: {
     selData() {
-      var filtered = this.devData.filter(d => {
-        if (d["DevType"] == this.selected) return  d;
-      }),
-      mapped = filtered.map((d) => {
-          let { CompFreq, ConvertedComp, Country } = d,
-            m = 1;
-            
-          if (CompFreq == "Weekly") m = 52;
-          else if (CompFreq == "Monthly") m = 12;
-          
-          let Salary = parseInt(ConvertedComp * m);
-          return {
-            Salary,
-            Country,
-          };
+      let data = [];
+
+      this.devData.forEach((d) => {
+        /* only get rows with selected job type */
+        if (d["DevType"].includes(this.selected) || this.selected == "Any") {
+          let { ConvertedComp, Country } = d;
+          /* Find existing object in data by country and add salary to sum and 1 to count.
+              If it doesn't exist create a new object for that country. */
+          let salary = parseInt(ConvertedComp),
+            index = data.findIndex((r) => r.country == Country);
+          if (index == -1)
+            data.push({
+              country: Country,
+              sum: salary,
+              average: salary,
+              count: 1,
+            });
+          else {
+            data[index]["sum"] += salary;
+            data[index]["count"] += 1;
+            data[index]["average"] = data[index]["sum"] / data[index]["count"];
+          }
+        }
       });
-      mapped.sort(function(x, y) {
-        return d3.descending(
-          +x["Salary"],
-          +y["Salary"]
-        );
-      });
-      console.log(mapped)
-      return mapped;
-    }
+
+      data = data
+        .filter((d) => d["count"] > 4)
+        .sort(function(x, y) {
+          return d3.descending(+x["average"], +y["average"]);
+        })
+        .slice(0, 10);
+      console.log(data);
+      return data;
+    },
   },
-  watch: {
-    selected() {
-    var t = this,
+  methods: {
+    drawChart() {
+      var t = this,
         chart = c3.generate({
           data: {
             color: () => {
@@ -57,23 +66,23 @@ export default {
             json: t.selData,
             type: "bar",
             keys: {
-              x: "Country",
-              value: ["Salary"]
+              x: "country",
+              value: ["average"],
             },
             labels: {
               format: function(v) {
                 var dollars = d3.format("$.2s");
                 return dollars(v).toUpperCase();
-              }
-            }
+              },
+            },
           },
           axis: {
             x: {
               type: "category",
               tick: {
                 width: 50,
-                multiline: true
-              }
+                multiline: true,
+              },
             },
             y: {
               show: false,
@@ -83,39 +92,47 @@ export default {
                 format: function(v) {
                   var dollars = d3.format("$.2s");
                   return v > 0 ? dollars(v).toUpperCase() : 0;
-                }
-              }
+                },
+              },
             },
-            rotated: true
+            rotated: true,
           },
           bar: {
             width: {
-              ratio: 0.75
-            }
+              ratio: 0.75,
+            },
           },
           grid: {
             y: {
-              show: true
-            }
+              show: true,
+            },
           },
           legend: {
-            show: false
+            show: false,
           },
           padding: {
-            left: 75
+            left: 75,
           },
           size: {
-            height: (t.selData.length * 10 - (t.selData.length - 1) * 4) * 10
+            height: (t.selData.length * 10 - (t.selData.length - 1) * 4) * 10,
           },
           tooltip: {
-           show: false
+            show: false,
           },
           onresize: function() {
             chart.flush();
-          }
+          },
         });
-    }
-  }
+    },
+  },
+  watch: {
+    selected() {
+      this.drawChart();
+    },
+  },
+  mounted() {
+    this.drawChart();
+  },
 };
 </script>
 
@@ -129,7 +146,7 @@ export default {
   text {
     font-size: 13px;
     fill: #000 !important;
-    font-family: 'Bebas Neue';
+    font-family: "Bebas Neue";
     @media screen and (max-width: 800px) {
       font-size: 12px;
     }

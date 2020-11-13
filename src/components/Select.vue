@@ -6,6 +6,7 @@
       </div>
       <div class="col-md-12">
         <select data-live-search="false" v-model="selected">
+        <option>Any</option>
           <option v-for="option in options" :key="option">{{ option }}</option>
         </select>
       </div>
@@ -22,7 +23,7 @@ import "bootstrap-select/dist/css/bootstrap-select.css";
 export default {
   data() {
     return {
-      selected: "Developer, full-stack",
+      selected: "Any",
     };
   },
   props: {
